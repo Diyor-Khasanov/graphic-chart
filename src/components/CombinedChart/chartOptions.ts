@@ -4,32 +4,31 @@ export const SERIES: ChartSeries[] = [
   {
     key: "cost",
     label: "Cost",
-    color: "#f5e97a",   // soft yellow – area fill + stroke
+    color: "#f5e97a",
     type: "area",
   },
   {
     key: "cpa",
     label: "CPA",
-    color: "#4f86f7",   // blue – dashed line
+    color: "#4f86f7",
     type: "line",
   },
   {
     key: "roi",
     label: "ROI confirmed",
-    color: "#34a853",   // green – smooth spline
+    color: "#34a853",
     type: "spline",
   },
   {
     key: "conversions",
     label: "Conversions",
-    color: "#b44fdb",   // purple – bar/marker line
+    color: "#b44fdb",
     type: "bar",
   },
 ];
 
-// Visual constants matching the screenshot
 export const CHART_COLORS = {
-  background: "#fce8ec",        // salmon pink panel bg
+  background: "#fce8ec",
   gridLine: "rgba(0,0,0,0.07)",
   axisText: "#999",
   tooltipBg: "#ffffff",
