@@ -2,13 +2,11 @@ import {
   ComposedChart,
   Area,
   Line,
-  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Dot,
 } from "recharts";
 import type { DataPoint } from "../../types/chart.types";
 import { CHART_COLORS } from "./chartOptions";
@@ -16,56 +14,57 @@ import { CustomTooltip } from "./CustomTooltip";
 
 interface Props {
   data: DataPoint[];
-  /**
-   * Optional: override the label shown in the top-left ("Tdy" by default)
-   */
   label?: string;
 }
 
-// Square dot for "Conversions" series — matches the screenshot markers
-const SquareDot = (props: {
-  cx?: number;
-  cy?: number;
-  stroke?: string;
-  fill?: string;
-}) => {
-  const { cx = 0, cy = 0, stroke, fill } = props;
-  const size = 7;
+const SquareDot = ({ cx = 0, cy = 0, index = 0, dataLength = 0, fill = "#b44fdb" }) => {
+  if (index !== 0 && index !== dataLength - 1) return <g />;
+  const size = 8;
   return (
     <rect
       x={cx - size / 2}
       y={cy - size / 2}
       width={size}
       height={size}
-      fill={fill || stroke}
+      fill={fill}
       stroke="#fff"
-      strokeWidth={1.5}
-      rx={1}
+      strokeWidth={2}
+      rx={1.5}
     />
   );
 };
 
-// Smooth dot for ROI spline — larger circle
-const SplineDot = (props: {
-  cx?: number;
-  cy?: number;
-  stroke?: string;
-  index?: number;
-}) => {
-  const { cx = 0, cy = 0, stroke, index } = props;
-  // Only render the "active" dot in the middle region (mimics the screenshot)
-  if (index !== 7) return <g />;
+const SplineDot = ({ cx = 0, cy = 0, stroke = "#2da84a", index = 0, dataLength = 15 }) => {
+  const mid = Math.floor(dataLength / 2) - 1;
+  if (index !== mid) return <g />;
   return (
     <circle
       cx={cx}
       cy={cy}
-      r={8}
+      r={9}
       fill={stroke}
       stroke="#fff"
-      strokeWidth={2}
-      opacity={0.85}
+      strokeWidth={2.5}
+      opacity={0.9}
     />
   );
+};
+
+const ActiveSquareDot = (props: any) => {
+    const { cx, cy, fill } = props;
+    const size = 8;
+    return (
+        <rect
+            x={cx - size / 2}
+            y={cy - size / 2}
+            width={size}
+            height={size}
+            fill={fill}
+            stroke="#fff"
+            strokeWidth={2}
+            rx={1.5}
+        />
+    );
 };
 
 export function CombinedChart({ data, label = "Tdy" }: Props) {
@@ -73,131 +72,99 @@ export function CombinedChart({ data, label = "Tdy" }: Props) {
     <div
       style={{
         background: CHART_COLORS.background,
-        borderRadius: 18,
-        padding: "20px 16px 16px 16px",
+        borderRadius: "16px",
+        padding: "24px 12px 12px 0px",
         position: "relative",
-        minHeight: 340,
       }}
     >
-      {/* Top-left label */}
       <span
         style={{
           position: "absolute",
-          top: 16,
-          left: 16,
-          fontSize: 13,
+          top: 24,
+          left: 12,
+          fontSize: "12px",
           fontWeight: 700,
-          color: "#555",
-          letterSpacing: 0.5,
-          textTransform: "uppercase",
+          color: "#666",
         }}
       >
         {label}
       </span>
 
       <ResponsiveContainer width="100%" height={300}>
-        <ComposedChart
-          data={data}
-          margin={{ top: 20, right: 20, left: 0, bottom: 0 }}
-        >
+        <ComposedChart data={data} margin={{ top: 16, right: 16, left: 8, bottom: 0 }}>
           <defs>
-            {/* Area gradient — warm yellow/cream like the screenshot */}
             <linearGradient id="costGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#f5e97a" stopOpacity={0.65} />
-              <stop offset="100%" stopColor="#f5e97a" stopOpacity={0.08} />
+              <stop offset="0%"   stopColor="#f0d060" stopOpacity={0.55} />
+              <stop offset="85%"  stopColor="#f5e890" stopOpacity={0.18} />
+              <stop offset="100%" stopColor="#f5e890" stopOpacity={0.00} />
             </linearGradient>
           </defs>
 
-          <CartesianGrid
-            strokeDasharray="0"
-            stroke={CHART_COLORS.gridLine}
-            horizontal
-            vertical={false}
-          />
+          <CartesianGrid stroke={CHART_COLORS.gridLine} horizontal vertical={false} />
 
           <XAxis
             dataKey="date"
-            tick={{ fontSize: 11, fill: CHART_COLORS.axisText }}
+            tickFormatter={v => v.split(".")[0]}
+            interval={1}
             axisLine={false}
             tickLine={false}
-            tickFormatter={(v: string) => {
-              // Show only day number to keep axis clean
-              return v.split(".")[0];
-            }}
+            tick={{ fontSize: 10, fill: "#aaa" }}
           />
 
           <YAxis
-            yAxisId="left"
-            orientation="left"
-            tick={{ fontSize: 11, fill: CHART_COLORS.axisText }}
+            domain={[0, 80]}
+            tickCount={5}
+            tickFormatter={v => v === 0 ? "0" : `$${v}`}
             axisLine={false}
             tickLine={false}
-            tickFormatter={(v: number) => (v === 0 ? "0" : `${v}`)}
-          />
-
-          {/* Second Y axis for ROI (larger scale) */}
-          <YAxis
-            yAxisId="right"
-            orientation="right"
-            tick={{ fontSize: 11, fill: CHART_COLORS.axisText }}
-            axisLine={false}
-            tickLine={false}
-            hide
+            tick={{ fontSize: 10, fill: "#aaa" }}
           />
 
           <Tooltip
             content={<CustomTooltip />}
-            cursor={{
-              stroke: "rgba(0,0,0,0.1)",
-              strokeWidth: 1,
-              strokeDasharray: "4 4",
-            }}
+            cursor={{ stroke: "rgba(0,0,0,0.12)", strokeWidth: 1, strokeDasharray: "3 3" }}
           />
 
-          {/* ── AREA: Cost (yellow fill) ── */}
+          {/* 1. Area — Cost */}
           <Area
-            yAxisId="left"
             type="monotone"
             dataKey="cost"
-            stroke="#e6d84a"
+            stroke="#d4b800"
             strokeWidth={1.5}
             fill="url(#costGradient)"
             dot={false}
-            activeDot={{ r: 4, fill: "#e6d84a", stroke: "#fff", strokeWidth: 2 }}
+            activeDot={{ r: 4, fill: "#d4b800", stroke: "#fff", strokeWidth: 2 }}
           />
 
-          {/* ── LINE: CPA (blue dashed) ── */}
+          {/* 2. Line — CPA (dashed blue) */}
           <Line
-            yAxisId="left"
             type="linear"
             dataKey="cpa"
-            stroke="#4f86f7"
+            stroke="#5b8cf5"
             strokeWidth={2}
-            strokeDasharray="6 4"
+            strokeDasharray="7 4"
             dot={false}
-            activeDot={{ r: 4, fill: "#4f86f7", stroke: "#fff", strokeWidth: 2 }}
+            activeDot={{ r: 4, fill: "#5b8cf5", stroke: "#fff", strokeWidth: 2 }}
           />
 
-          {/* ── SPLINE: ROI confirmed (green smooth curve) ── */}
+          {/* 3. Spline — ROI confirmed (green, smooth) */}
           <Line
-            yAxisId="right"
             type="monotoneX"
             dataKey="roi"
-            stroke="#34a853"
+            stroke="#2da84a"
             strokeWidth={2.5}
-            dot={<SplineDot />}
-            activeDot={{ r: 5, fill: "#34a853", stroke: "#fff", strokeWidth: 2 }}
+            dot={(props: any) => <SplineDot {...props} dataLength={data.length} />}
+            activeDot={{ r: 5, fill: "#2da84a", stroke: "#fff", strokeWidth: 2 }}
           />
 
-          {/* ── BAR-style: Conversions (purple line + square dots) ── */}
+          {/* 4. Conversions (purple, square endpoints) */}
           <Line
-            yAxisId="left"
             type="linear"
             dataKey="conversions"
             stroke="#b44fdb"
             strokeWidth={2}
-            dot={<SquareDot fill="#b44fdb" />}
-            activeDot={<SquareDot fill="#b44fdb" />}
+            dot={(props: any) => <SquareDot {...props} dataLength={data.length} fill="#b44fdb" />}
+            activeDot={<ActiveSquareDot />}
           />
         </ComposedChart>
       </ResponsiveContainer>

@@ -21,27 +21,26 @@ export function CustomTooltip({ active, payload, label }: Props) {
         background: CHART_COLORS.tooltipBg,
         border: `1px solid ${CHART_COLORS.tooltipBorder}`,
         boxShadow: CHART_COLORS.tooltipShadow,
-        borderRadius: 14,
-        padding: "14px 18px",
-        minWidth: 210,
-        fontFamily: "inherit",
+        borderRadius: "16px",
+        padding: "13px 18px 15px",
+        minWidth: "220px",
+        pointerEvents: "none",
       }}
     >
       {/* Date header */}
       <p
         style={{
-          fontSize: 13,
-          color: "#888",
+          fontSize: "12.5px",
+          color: "#999",
           fontWeight: 500,
-          marginBottom: 10,
-          letterSpacing: 0.2,
+          marginBottom: "10px",
         }}
       >
         {label}
       </p>
 
       {/* Series rows */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
         {SERIES.map((s) => {
           const val = values[s.key];
           if (val === undefined) return null;
@@ -52,13 +51,13 @@ export function CustomTooltip({ active, payload, label }: Props) {
           return (
             <div
               key={s.key}
-              style={{ display: "flex", alignItems: "center", gap: 8 }}
+              style={{ display: "flex", alignItems: "center", gap: "8px" }}
             >
               {/* Colored dot */}
               <span
                 style={{
-                  width: 12,
-                  height: 12,
+                  width: "11px",
+                  height: "11px",
                   borderRadius: "50%",
                   background: s.color,
                   flexShrink: 0,
@@ -66,7 +65,7 @@ export function CustomTooltip({ active, payload, label }: Props) {
                 }}
               />
               {/* Label + value */}
-              <span style={{ fontSize: 14, color: "#333" }}>
+              <span style={{ fontSize: "14px", color: "#2c2c2c" }}>
                 {s.label}:{" "}
                 <strong style={{ fontWeight: 700, color: "#111" }}>
                   {formatted}
